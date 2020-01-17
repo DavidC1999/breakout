@@ -7,7 +7,7 @@ export class Player implements IGameObject {
     x:number = DrawHelper.w/2 - 50;
     y:number = DrawHelper.h - 50;
     w:number = 100;
-    h:number = 30;
+    h:number = 10;
 
     speed = 500;
     
@@ -32,7 +32,7 @@ export class Player implements IGameObject {
     }
     
     draw(): void {
-        DrawHelper.setColor("#000000");
+        DrawHelper.setColor("#0066FF");
         DrawHelper.rect(this.x, this.y, this.w, this.h);
     }
     

@@ -2,7 +2,7 @@ import { DrawHelper } from "./DrawHelper";
 import { Game } from "./Game";
 
 
-DrawHelper.init(500, 700);
+DrawHelper.init(500, 600);
 export let game = new Game();
 
 let lastTime = 0;
