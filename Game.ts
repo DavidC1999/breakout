@@ -8,16 +8,35 @@ export class Game {
     blocks: Block[] = [];
     player: Player;
     ball: Ball;
-    gui:GUI;
-
-    upperBound = 100;
+    gui: GUI;
 
     background = "black";
 
     score = 0;
+    turnsLeft = 3;
+
+    blockHits = 0;
+    hitOrange = false;
+    hitRed = false;
+
+    paused = false;
+    gameStarted = false;
 
     constructor() {
         this.createGameObjects();
+
+        this.requestEventListener("keyup", function (event, game) {
+            if (event.key == "Escape") {
+                game.paused = !game.paused;
+            } else if (event.key == " ") {
+                if (!game.gameStarted) {
+                    game.gameStarted = true;
+                    game.player.w = Player.WIDTH;
+                    game.player.x = DrawHelper.w / 2 - game.player.w / 2;
+                    game.ball.reset();
+                }
+            }
+        }, this);
     }
 
     update(dt: number): void {
@@ -25,16 +44,16 @@ export class Game {
         this.collisionPlayer(dt);
         this.collisionBlock(dt);
 
-        if (this.checkGameOver()) {
-            this.ball.reset();
+        this.checkGameOver();
+
+        if (!this.paused) {
+            this.blocks.forEach((block) => {
+                block.update(dt);
+            });
+
+            this.player.update(dt);
+            this.ball.update(dt);
         }
-
-        this.blocks.forEach((block) => {
-            block.update(dt);
-        });
-
-        this.player.update(dt);
-        this.ball.update(dt);
     }
 
     draw(): void {
@@ -48,7 +67,7 @@ export class Game {
         this.player.draw();
         this.ball.draw();
         this.gui.draw();
-        
+
     }
 
     requestEventListener(on: string, callback: Function, object): void {
@@ -60,8 +79,9 @@ export class Game {
     private createGameObjects(): void {
         this.player = new Player(this);
 
-        // let bw = Block.WIDTH;
-        // let bh = Block.HEIGHT;
+
+        let padding = 10;
+        let offsetY = 100;
         let brickAmtX = 14;
         let brickAmtY = 8;
 
@@ -69,31 +89,28 @@ export class Game {
         let brickAreaHeight = 100;
 
 
-
-        let padding = 10;
-
-        let brickWidth = (screenWidth / brickAmtX) - padding/2 + (padding / brickAmtX);
-        let brickHeight = (brickAreaHeight / brickAmtY) - padding/2;
+        let brickWidth = (screenWidth / brickAmtX) - padding / 2 + (padding / brickAmtX);
+        let brickHeight = (brickAreaHeight / brickAmtY) - padding / 2;
         Block.WIDTH = brickWidth;
         Block.HEIGHT = brickHeight;
 
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 0, "red"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 1, "red"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 2, "orange"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 3, "orange"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 4, "green"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 5, "green"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 6, "yellow"));
-        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 7, "yellow"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 0, offsetY, "red"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 1, offsetY, "red"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 2, offsetY, "orange"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 3, offsetY, "orange"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 4, offsetY, "green"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 5, offsetY, "green"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 6, offsetY, "yellow"));
+        this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 7, offsetY, "yellow"));
 
         this.ball = new Ball();
         this.gui = new GUI(this);
     }
 
-    private createBlockLine(amt: number, padding: number, lineNumber: number, color: string) {
+    private createBlockLine(amt: number, padding: number, lineNumber: number, offsetY: number, color: string) {
         let output: Block[] = [];
         for (let i = 0; i < amt; i++) {
-            output.push(new Block(i * Block.WIDTH + (padding/2*i), this.upperBound + lineNumber * Block.HEIGHT + (padding / 2 * lineNumber), color));
+            output.push(new Block(i * Block.WIDTH + (padding / 2 * i), offsetY + lineNumber * Block.HEIGHT + (padding / 2 * lineNumber), color));
         }
         return output;
     }
@@ -103,14 +120,15 @@ export class Game {
             this.ball.velocity.x *= -1;
         }
 
-        if (this.ball.y + this.ball.s + this.ball.velocity.y * dt > DrawHelper.h || this.ball.y + this.ball.velocity.y * dt < this.upperBound) {
+        if (this.ball.y + this.ball.s + this.ball.velocity.y * dt > DrawHelper.h || this.ball.y + this.ball.velocity.y * dt < 0) {
             this.ball.velocity.y *= -1;
         }
     }
 
     private collisionBlock(dt: number) {
-        let margin = 5;
-        this.blocks.forEach((block) => {
+        let margin = 7;
+        for (let i = this.blocks.length - 1; i >= 0; i--) {
+            let block = this.blocks[i];
             let withinY = this.ball.y + this.ball.s + this.ball.velocity.y * dt >= block.y && this.ball.y + this.ball.velocity.y * dt <= block.y + block.h;
             let withinX = this.ball.x + this.ball.s + this.ball.velocity.x * dt >= block.x && this.ball.x + this.ball.velocity.x * dt <= block.x + block.w;
 
@@ -122,10 +140,30 @@ export class Game {
                 } else {
                     this.ball.velocity.x *= -1;
                 }
+                if (!this.gameStarted) break;
                 block.destroy();
                 this.score += block.score;
+                this.hitBlock(block);
+                break;
             }
-        });
+        }
+    }
+
+    private hitBlock(block: Block) {
+        this.blockHits++;
+        if (this.blockHits == 4) {
+            this.ball.increaseSpeed();
+        } else if (this.blockHits == 12) {
+            this.ball.increaseSpeed();
+        }
+
+        if (block.color == "orange" && !this.hitOrange) {
+            this.hitOrange = true;
+            this.ball.increaseSpeed();
+        } else if (block.color == "red" && !this.hitRed) {
+            this.hitRed = true;
+            this.ball.increaseSpeed();
+        }
     }
 
     private collisionPlayer(dt: number) {
@@ -135,14 +173,26 @@ export class Game {
                 this.ball.velocity.y *= -1;
                 this.ball.velocity.x = factor * (((this.ball.x + this.ball.s / 2) - (this.player.x + (this.player.w / 2))) / (2 * this.player.w));
                 this.ball.velocity.setRadius(this.ball.speed);
-
             }
         }
     }
 
-    private checkGameOver(): boolean {
-        // return this.ball.y + this.ball.s > this.player.y;
-        return this.ball.y + this.ball.s > DrawHelper.h;
+    private checkGameOver() {
+        if (this.ball.y > this.player.y) {
+            this.ball.reset();
+            // this.paused = true;
+            // debugger;
+            this.turnsLeft--;
+            if (this.turnsLeft <= 0) {
+                console.log("test");
+                
+                this.gameStarted = false;
+
+                this.player.w = DrawHelper.w;
+                this.turnsLeft = 3;
+            }
+        }
+        // return this.ball.y + this.ball.s > DrawHelper.h;
     }
 
 }
