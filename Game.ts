@@ -33,24 +33,12 @@ export class Game {
             if (event.key == "Escape") {
                 game.paused = !game.paused;
             } else if (event.key == " ") {
-                if (game.gameState === GameState.BeginScreen) {
-                    game.gameState = GameState.Screen1
-                    game.player.w = Player.WIDTH;
-                    game.player.x = DrawHelper.w / 2 - game.player.w / 2;
-                    game.ball.resetOnTimer();
-                } else if (game.gameState === GameState.Lose || game.gameState == GameState.Win) {
-                    game.gameState = GameState.BeginScreen;
-                    game.blocks = [];
-                    game.createBlocks();
-                    game.turnsLeft = Game.TURNS;
-                    game.score = 0;
-                    game.blockHits = 0;
-                    game.hitOrange = false;
-                    game.hitRed = false;
-                    game.ball.resetSpeed();
-                }
-
+                game.forwardGameState(game);
             }
+        }, this);
+
+        this.requestEventListener("mouseup", function(event, game) {
+            game.forwardGameState(game);
         }, this);
     }
 
@@ -89,6 +77,25 @@ export class Game {
         document.addEventListener(on, (event) => {
             callback(event, object);
         });
+    }
+
+    private forwardGameState(game) {
+        if (game.gameState === GameState.BeginScreen) {
+            game.gameState = GameState.Screen1
+            game.player.w = Player.WIDTH;
+            game.player.x = DrawHelper.w / 2 - game.player.w / 2;
+            game.ball.resetOnTimer();
+        } else if (game.gameState === GameState.Lose || game.gameState == GameState.Win) {
+            game.gameState = GameState.BeginScreen;
+            game.blocks = [];
+            game.createBlocks();
+            game.turnsLeft = Game.TURNS;
+            game.score = 0;
+            game.blockHits = 0;
+            game.hitOrange = false;
+            game.hitRed = false;
+            game.ball.resetSpeed();
+        }
     }
 
     private createGameObjects(): void {

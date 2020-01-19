@@ -13,17 +13,16 @@ export class Player implements IGameObject {
 
     speed = 500;
 
-    velocity: Vector;
-
     movingLeft = false;
     movingRight = false;
 
 
     constructor(game: Game) {
-        game.requestEventListener("keydown", this.moveStart, this);
-        game.requestEventListener("keyup", this.moveStop, this);
+        game.requestEventListener("keydown", this.moveStartKeyboard, this);
+        game.requestEventListener("keyup", this.moveStopKeyboard, this);
 
-        this.velocity = new Vector(0, 0);
+        game.requestEventListener("mousedown", this.moveStartMobile, this);
+        game.requestEventListener("mouseup", this.moveStopMobile, this);
     }
 
     update(dt: number): void {
@@ -42,7 +41,7 @@ export class Player implements IGameObject {
         DrawHelper.rect(this.x, this.y, this.w, this.h);
     }
 
-    moveStart(event, player) {
+    moveStartKeyboard(event, player) {
         if (event.key == "ArrowLeft") {
             player.movingLeft = true;
         }
@@ -51,12 +50,32 @@ export class Player implements IGameObject {
         }
     }
 
-    moveStop(event, player) {
+    moveStopKeyboard(event, player) {
         if (event.key == "ArrowRight") {
             player.movingRight = false;
         }
         if (event.key == "ArrowLeft") {
             player.movingLeft = false;
+        }
+    }
+
+    moveStartMobile(event, player) {
+        let documentMiddle = document.body.clientWidth / 2;
+        if(event.clientX < documentMiddle) {
+            player.movingLeft = true;
+        }
+        if(event.clientX > documentMiddle) {
+            player.movingRight = true;
+        }
+    }
+
+    moveStopMobile(event, player) {
+        let documentMiddle = document.body.clientWidth / 2;
+        if(event.clientX < documentMiddle) {
+            player.movingLeft = false;
+        }
+        if(event.clientX > documentMiddle) {
+            player.movingRight = false;
         }
     }
 }
