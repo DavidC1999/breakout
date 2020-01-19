@@ -1,5 +1,5 @@
 import { DrawHelper } from "./DrawHelper";
-import { Game } from "./Game";
+import { Game, GameState } from "./Game";
 
 export class GUI {
     game: Game;
@@ -13,16 +13,17 @@ export class GUI {
         DrawHelper.text("Turns: " + this.game.turnsLeft.toString(), 15, DrawHelper.w - 100, 25);
 
         if (this.game.paused) {
-            let pausedText = "PAUSED";
-            let textWidth = DrawHelper.ctx.measureText(pausedText).width;
-            DrawHelper.text(pausedText, 15, DrawHelper.w / 2 - textWidth / 2, DrawHelper.h / 2);
+            this.drawGUIText("PAUSED");
+        } else if (this.game.gameState == GameState.BeginScreen) {
+            this.drawGUIText("Press SPACEBAR to start the game");
+        } else if (this.game.gameState == GameState.Lose) {
+            this.drawGUIText("Press SPACEBAR to try again");
         }
+    }
 
-        if(!this.game.gameStarted) {
-            let helpText = "Press SPACEBAR to start the game";
-            let textWidth = DrawHelper.ctx.measureText(helpText).width;
-            DrawHelper.text(helpText, 15, DrawHelper.w / 2 - textWidth / 2, DrawHelper.h / 2);
-        }
+    drawGUIText(str: string) {
+        let textWidth = DrawHelper.ctx.measureText(str).width;
+        DrawHelper.text(str, 15, DrawHelper.w / 2 - textWidth / 2, DrawHelper.h / 2);
     }
 
 }

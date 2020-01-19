@@ -20,7 +20,9 @@ export class Game {
     hitRed = false;
 
     paused = false;
-    gameStarted = false;
+    // gameStarted = false;
+
+    gameState = GameState.BeginScreen;
 
     constructor() {
         this.createGameObjects();
@@ -29,12 +31,23 @@ export class Game {
             if (event.key == "Escape") {
                 game.paused = !game.paused;
             } else if (event.key == " ") {
-                if (!game.gameStarted) {
-                    game.gameStarted = true;
+                if (game.gameState === GameState.BeginScreen) {
+                    game.gameState = GameState.Screen1
                     game.player.w = Player.WIDTH;
                     game.player.x = DrawHelper.w / 2 - game.player.w / 2;
-                    game.ball.reset();
+                    game.ball.resetOnTimer();
+                } else if (game.gameState === GameState.Lose) {
+                    game.gameState = GameState.BeginScreen;
+                    game.blocks = [];
+                    game.createBlocks();
+                    game.turnsLeft = 3;
+                    game.score = 0;
+                    game.blockHits = 0;
+                    game.hitOrange = false;
+                    game.hitRed = false;
+                    game.ball.resetSpeed();
                 }
+
             }
         }, this);
     }
@@ -79,7 +92,14 @@ export class Game {
     private createGameObjects(): void {
         this.player = new Player(this);
 
+        this.createBlocks();
 
+
+        this.ball = new Ball();
+        this.gui = new GUI(this);
+    }
+
+    private createBlocks() {
         let padding = 10;
         let offsetY = 100;
         let brickAmtX = 14;
@@ -102,9 +122,6 @@ export class Game {
         this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 5, offsetY, "green"));
         this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 6, offsetY, "yellow"));
         this.blocks = this.blocks.concat(this.createBlockLine(brickAmtX, padding, 7, offsetY, "yellow"));
-
-        this.ball = new Ball();
-        this.gui = new GUI(this);
     }
 
     private createBlockLine(amt: number, padding: number, lineNumber: number, offsetY: number, color: string) {
@@ -140,7 +157,7 @@ export class Game {
                 } else {
                     this.ball.velocity.x *= -1;
                 }
-                if (!this.gameStarted) break;
+                if (this.gameState === GameState.BeginScreen || this.gameState == GameState.Lose || this.gameState == GameState.Win) break;
                 block.destroy();
                 this.score += block.score;
                 this.hitBlock(block);
@@ -185,14 +202,22 @@ export class Game {
             this.turnsLeft--;
             if (this.turnsLeft <= 0) {
                 console.log("test");
-                
-                this.gameStarted = false;
 
+                this.gameState = GameState.Lose;
                 this.player.w = DrawHelper.w;
-                this.turnsLeft = 3;
+                this.player.x = 0;
+                // this.turnsLeft = 3;
             }
         }
         // return this.ball.y + this.ball.s > DrawHelper.h;
     }
 
+}
+
+export enum GameState {
+    BeginScreen,
+    Screen1,
+    Screen2,
+    Win,
+    Lose,
 }

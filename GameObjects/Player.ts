@@ -1,7 +1,7 @@
 import { IGameObject } from "../IGameObject";
 import { DrawHelper } from "../DrawHelper";
 import { Vector } from "../Vector";
-import { Game } from "../Game";
+import { Game, GameState } from "../Game";
 import { game } from "../main";
 
 export class Player implements IGameObject {
@@ -27,7 +27,7 @@ export class Player implements IGameObject {
     }
 
     update(dt: number): void {
-        if(!game.gameStarted) {
+        if(game.gameState == GameState.BeginScreen) {
             this.x = 0;
             return;
         }
