@@ -33,6 +33,12 @@ export class Ball implements IGameObject {
     }
 
     reset() {
+        this.x = DrawHelper.w / 2 - this.s / 2;
+        this.y = DrawHelper.h / 2 - this.s / 2;
+        this.velocity = Vector.fromPolar((Math.random() / 2 + 1 / 4) * Math.PI, this.speed);
+    }
+
+    resetOnTimer() {
         // this.x = 10;
         // this.y = this.blocks[1].y;
         this.x = -100;
@@ -40,9 +46,7 @@ export class Ball implements IGameObject {
         this.velocity.x = 0;
         this.velocity.y = 0;
         setTimeout(() => {
-            this.x = DrawHelper.w / 2 - this.s / 2;
-            this.y = DrawHelper.h / 2 - this.s / 2;
-            this.velocity = Vector.fromPolar((Math.random() / 2 + 1 / 4) * Math.PI, this.speed);
+            this.reset();
         }, 2000);
         // this.velocity = Vector.fromPolar(Math.random() * (Math.PI * 2), this.speed);
     }
