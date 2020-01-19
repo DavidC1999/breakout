@@ -5,7 +5,7 @@ import { Block } from "./GameObjects/Block";
 import { GUI } from "./GUI";
 
 export class Game {
-    static readonly TURNS = 100;
+    static readonly TURNS = 3;
 
     blocks: Block[] = [];
     player: Player;
@@ -155,9 +155,9 @@ export class Game {
                 let bottom = this.ball.y + this.ball.velocity.y * dt > (block.y + block.h - margin);
                 let top = this.ball.y + this.ball.s + this.ball.velocity.y * dt < (block.y + margin);
                 if (bottom || top) {
-                    // this.ball.velocity.y *= -1;
+                    this.ball.velocity.y *= -1;
                 } else {
-                    // this.ball.velocity.x *= -1;
+                    this.ball.velocity.x *= -1;
                 }
                 if (this.gameState === GameState.BeginScreen || this.gameState == GameState.Lose || this.gameState == GameState.Win) break;
                 block.destroy();
@@ -187,7 +187,7 @@ export class Game {
         if (this.blockHits == this.blocks.length) {
             this.ball.whichSpeed = "initial";
             this.ball.resetOnTimer();
-            
+
             this.gameState = GameState.Screen2;
             this.blocks = [];
             this.createBlocks();
