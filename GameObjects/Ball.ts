@@ -3,11 +3,14 @@ import { DrawHelper } from "../DrawHelper";
 import { Vector } from "../Vector";
 
 export class Ball implements IGameObject {
+    static readonly SPEED = 200;
 
     x: number;
     y: number;
     s = 10;
-    speed:number;
+    speed:number = Ball.SPEED;
+
+    whichSpeed = "actual";
 
     color: string;
 
@@ -15,7 +18,7 @@ export class Ball implements IGameObject {
 
     constructor() {
         this.resetSpeed();
-        
+
         this.x = DrawHelper.w / 2 - this.s / 2;
         this.y = DrawHelper.h / 2 - this.s / 2;
         this.velocity = Vector.fromPolar((Math.random() / 2 + 1 / 4) * Math.PI, this.speed);
@@ -37,7 +40,8 @@ export class Ball implements IGameObject {
     reset() {
         this.x = DrawHelper.w / 2 - this.s / 2;
         this.y = DrawHelper.h / 2 - this.s / 2;
-        this.velocity = Vector.fromPolar((Math.random() / 2 + 1 / 4) * Math.PI, this.speed);
+        let speed = this.whichSpeed == "actual" ? this.speed : Ball.SPEED;
+        this.velocity = Vector.fromPolar((Math.random() / 2 + 1 / 4) * Math.PI, speed);
     }
 
     resetOnTimer() {
@@ -51,7 +55,7 @@ export class Ball implements IGameObject {
     }
 
     resetSpeed() {
-        this.speed = 200;
+        this.speed = Ball.SPEED;
     }
 
 

@@ -27,7 +27,7 @@ export class Player implements IGameObject {
     }
 
     update(dt: number): void {
-        if(game.gameState == GameState.BeginScreen) {
+        if(game.gameState == GameState.BeginScreen || game.gameState == GameState.Lose || game.gameState == GameState.Win) {
             this.x = 0;
             return;
         }

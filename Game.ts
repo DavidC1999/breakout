@@ -5,6 +5,8 @@ import { Block } from "./GameObjects/Block";
 import { GUI } from "./GUI";
 
 export class Game {
+    static readonly TURNS = 100;
+
     blocks: Block[] = [];
     player: Player;
     ball: Ball;
@@ -13,7 +15,7 @@ export class Game {
     background = "black";
 
     score = 0;
-    turnsLeft = 3;
+    turnsLeft = Game.TURNS;
 
     blockHits = 0;
     hitOrange = false;
@@ -36,11 +38,11 @@ export class Game {
                     game.player.w = Player.WIDTH;
                     game.player.x = DrawHelper.w / 2 - game.player.w / 2;
                     game.ball.resetOnTimer();
-                } else if (game.gameState === GameState.Lose) {
+                } else if (game.gameState === GameState.Lose || game.gameState == GameState.Win) {
                     game.gameState = GameState.BeginScreen;
                     game.blocks = [];
                     game.createBlocks();
-                    game.turnsLeft = 3;
+                    game.turnsLeft = Game.TURNS;
                     game.score = 0;
                     game.blockHits = 0;
                     game.hitOrange = false;
@@ -153,9 +155,9 @@ export class Game {
                 let bottom = this.ball.y + this.ball.velocity.y * dt > (block.y + block.h - margin);
                 let top = this.ball.y + this.ball.s + this.ball.velocity.y * dt < (block.y + margin);
                 if (bottom || top) {
-                    this.ball.velocity.y *= -1;
+                    // this.ball.velocity.y *= -1;
                 } else {
-                    this.ball.velocity.x *= -1;
+                    // this.ball.velocity.x *= -1;
                 }
                 if (this.gameState === GameState.BeginScreen || this.gameState == GameState.Lose || this.gameState == GameState.Win) break;
                 block.destroy();
@@ -181,6 +183,19 @@ export class Game {
             this.hitRed = true;
             this.ball.increaseSpeed();
         }
+
+        if (this.blockHits == this.blocks.length) {
+            this.ball.whichSpeed = "initial";
+            this.ball.resetOnTimer();
+            
+            this.gameState = GameState.Screen2;
+            this.blocks = [];
+            this.createBlocks();
+        } else if (this.blockHits == this.blocks.length * 2) {
+            this.gameState = GameState.Win;
+            this.player.w = DrawHelper.w;
+            this.player.x = 0;
+        }
     }
 
     private collisionPlayer(dt: number) {
@@ -190,15 +205,15 @@ export class Game {
                 this.ball.velocity.y *= -1;
                 this.ball.velocity.x = factor * (((this.ball.x + this.ball.s / 2) - (this.player.x + (this.player.w / 2))) / (2 * this.player.w));
                 this.ball.velocity.setRadius(this.ball.speed);
+                this.ball.whichSpeed = "actual";
             }
         }
     }
 
     private checkGameOver() {
         if (this.ball.y > this.player.y) {
-            this.ball.reset();
-            // this.paused = true;
-            // debugger;
+            this.ball.whichSpeed = "initial";
+            this.ball.resetOnTimer();
             this.turnsLeft--;
             if (this.turnsLeft <= 0) {
                 console.log("test");
@@ -206,10 +221,8 @@ export class Game {
                 this.gameState = GameState.Lose;
                 this.player.w = DrawHelper.w;
                 this.player.x = 0;
-                // this.turnsLeft = 3;
             }
         }
-        // return this.ball.y + this.ball.s > DrawHelper.h;
     }
 
 }

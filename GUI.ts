@@ -18,6 +18,8 @@ export class GUI {
             this.drawGUIText("Press SPACEBAR to start the game");
         } else if (this.game.gameState == GameState.Lose) {
             this.drawGUIText("Press SPACEBAR to try again");
+        } else if(this.game.gameState == GameState.Win) {
+            this.drawGUIText("You did it! Press SPACEBAR for a new game");
         }
     }
 
